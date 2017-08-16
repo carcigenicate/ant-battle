@@ -1,7 +1,9 @@
 (ns ant-battle.simulation.board
   (:require [ant-battle.simulation.ant :as a]
-            [ant-battle.simulation.ant-controller :as ac]))
+            [ant-battle.simulation.ant-controller :as ac]
+            [ant-battle.simulation.advance-f-io :as io]))
 
+; TODO: Default color?
 ; TODO: Overwrite checks for ants?
 ; TODO: Boundry checking?
 (comment
@@ -42,3 +44,10 @@
 
 (defn set-color [board position new-color]
   (assoc board :colors position new-color))
+
+(defn get-tile [board position]
+  (let [gb #(get-in board [% position] nil)]
+    (io/->Tile-State (gb :colors)
+                     (gb :ants)
+                     (gb :food))))
+
