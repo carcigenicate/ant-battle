@@ -1,10 +1,20 @@
 (ns ant-battle.simulation.ant-controller
   (:require [ant-battle.simulation.ant :as a]))
 
-(def queen-n 0)
+(def queen-type 0)
+
+(defn new-worker [starting-pos worker-type]
+  (if-not (= worker-type queen-type)
+    (a/new-ant starting-pos worker-type)
+
+    (throw (RuntimeException.
+             (str "Tried to create a queen as a worker at " starting-pos)))))
+
+(defn new-queen [starting-pos]
+  (a/new-ant starting-pos queen-type))
 
 (defn queen? [ant]
-  (= queen-n
+  (= queen-type
      (a/get-type ant)))
 
 (defn has-food? [ant]

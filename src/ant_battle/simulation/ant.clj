@@ -1,5 +1,4 @@
-(ns ant-battle.simulation.ant
-  (:require [ant-battle.simulation.ant-p :as ap]))
+(ns ant-battle.simulation.ant)
 
 (defrecord Ant [position type food])
 
