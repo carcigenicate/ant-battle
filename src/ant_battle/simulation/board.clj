@@ -1,7 +1,9 @@
 (ns ant-battle.simulation.board
   (:require [ant-battle.simulation.ant :as a]
             [ant-battle.simulation.ant-controller :as ac]
-            [ant-battle.simulation.advance-f-io :as io]))
+            [ant-battle.simulation.advance-f-io :as io]
+
+            [helpers.general-helpers :as g]))
 
 ; TODO: Default color?
 ; TODO: Overwrite checks for ants?
@@ -15,8 +17,8 @@
   (->Board [width height]
            {} {} #{}))
 
-(defn add-ant [board position type]
-  (let [new-ant (a/new-ant position type)]
+(defn add-ant [board position type colony]
+  (let [new-ant (a/new-ant position type colony)]
 
     (update board :ants
             #(assoc % position new-ant))))
@@ -42,6 +44,10 @@
   (update board :food
           #(conj % position)))
 
+(defn remove-food [board position]
+  (update board :food
+          #(disj % position)))
+
 (defn set-color [board position new-color]
   (assoc board :colors position new-color))
 
@@ -50,4 +56,13 @@
     (io/->Tile-State (gb :colors)
                      (gb :ants)
                      (gb :food))))
+
+(defn- coords-surrounding [[x y]]
+  (for [y (range (dec y) (+ y 2))
+        x (range (dec x) (+ x 2))]
+    [x y]))
+
+(defn tiles-surrounding [board position]
+  (map #(get-tile board %)
+       (coords-surrounding position)))
 

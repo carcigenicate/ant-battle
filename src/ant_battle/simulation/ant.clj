@@ -1,9 +1,9 @@
 (ns ant-battle.simulation.ant)
 
-(defrecord Ant [position type food])
+(defrecord Ant [position type food colony])
 
-(defn new-ant [starting-pos ant-type]
-  (->Ant starting-pos ant-type 0))
+(defn new-ant [starting-pos ant-type colony]
+  (->Ant starting-pos ant-type 0 colony))
 
 ; ----- Movement -----
 
@@ -28,3 +28,6 @@
 
 (defn get-type [ant]
   (:type ant))
+
+(defn get-colony [ant]
+  (:colony ant))

@@ -3,15 +3,15 @@
 
 (def queen-type 0)
 
-(defn new-worker [starting-pos worker-type]
+(defn new-worker [starting-pos worker-type colony]
   (if-not (= worker-type queen-type)
-    (a/new-ant starting-pos worker-type)
+    (a/new-ant starting-pos worker-type colony)
 
     (throw (RuntimeException.
              (str "Tried to create a queen as a worker at " starting-pos)))))
 
-(defn new-queen [starting-pos]
-  (a/new-ant starting-pos queen-type))
+(defn new-queen [starting-pos colony]
+  (a/new-ant starting-pos queen-type colony))
 
 (defn queen? [ant]
   (= queen-type
@@ -40,7 +40,7 @@
   If the ant isn't carrying any food, nil is returned."
   [ant]
   (when (has-food? ant)
-    (take-food ant)))
+    (a/take-food ant)))
 
 (defn transfer-food
   "Gives food from the source ant to the target ant.
