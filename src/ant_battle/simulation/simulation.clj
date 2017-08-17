@@ -49,16 +49,17 @@
             (b/move-ant board ant-pos (v-coords move-to?))
 
             new-ant-at?
-            (handle-ant-spawn board ant spawn-pos spawn-type))]
+            (handle-ant-spawn board ant (v-coords spawn-pos) spawn-type))]
 
       (if new-tile-color?
         (b/set-color advanced-board ant-pos new-tile-color?)
         advanced-board))
 
     (catch Exception e
-      (print-violation-warning "Move: " (into {} move) " caused an exception:\n" (.getStackTrace e))
+      (print-violation-warning "Move: " (into {} move) " caused an exception:\n" e)
       board)))
 
+; TODO: Test!!!
 (defn simulate-frame [sim]
   (let [{board :board fm :colony-advance-f-map} sim
         initial-ants (seq (:ants board))]
@@ -68,10 +69,15 @@
 
       (if ant
         (let [advance-f (fm (a/get-colony ant))
+
               neigh-coords (vec (b/coords-surrounding (a/get-position ant)))
               neigh-tiles (vec (b/tiles-for-positions acc-board neigh-coords))
+
               input (io/->Ant-State neigh-tiles)
-              move (parse-move (advance-f ant))])))))
+              move (parse-move (advance-f ant))
+              advanced-board (advance-board-with-move acc-board ant neigh-coords move)]
 
+          (recur rest-ants advanced-board))
 
+        (assoc sim :board acc-board)))))
 

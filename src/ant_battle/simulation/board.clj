@@ -24,10 +24,11 @@
 
 (defn update-ant
   "Updates the ant at the given position using the given (f)unction.
+  Should not be used to update position.
   If no ant exists at the position, nil is returned."
   [board position f]
   (when-let [ant (get-in board [:ants position] nil)]
-    (assoc board :ants (f ant))))
+    (update board :ants #(assoc % position (f ant)))))
 
 (defn move-ant
   "If an ant can be found at old-position, it's moved to new-position
