@@ -61,7 +61,6 @@
 
 ; TODO: Test!!!
 (defn simulate-frame [sim]
-  (println "Simming")
   (let [{board :board fm :colony-advance-f-map} sim
         initial-ants (map second (:ants board))]
 

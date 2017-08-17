@@ -13,8 +13,8 @@
 (def display-width 1000)
 (def display-height 1000)
 
-(def grid-width 25)
-(def grid-height 25)
+(def grid-width 40)
+(def grid-height 40)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (max grid-width grid-height))))
@@ -32,6 +32,7 @@
       (b/update-ant [10 10] a/give-food)))
 
 (defn setup-state []
+  (q/frame-rate 2)
   (->Animation-State (s/->Simulation-State test-board cf/test-f-map)))
 
 (defn update-state [state]
@@ -39,7 +40,7 @@
   (clojure.pprint/pprint (:board (:sim-state state)))
 
   (-> state
-      (update state :sim-state s/simulate-frame)))
+      (update :sim-state s/simulate-frame)))
 
 (defn grid-coord-to-screen [[x y]]
   [(g/map-range x 0 grid-width 0 display-width)
