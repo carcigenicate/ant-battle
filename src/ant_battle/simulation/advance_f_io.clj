@@ -1,7 +1,5 @@
 (ns ant-battle.simulation.advance-f-io)
 
-(def alliances #{:friendly :enemy})
-
 (defrecord Tile-State [color ant? food?])
 
 ; TODO: Colony-State
