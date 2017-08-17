@@ -11,11 +11,10 @@
 (comment
   (defmacro inbounds? [board & positions]))
 
-(defrecord Board [dimensions ants colors food])
+(defrecord Board [ants colors food])
 
-(defn new-board [width height]
-  (->Board [width height]
-           {} {} #{}))
+(defn new-board []
+  (->Board {} {} #{}))
 
 (defn add-ant [board position type colony]
   (let [new-ant (a/new-ant position type colony)]
@@ -57,12 +56,15 @@
                      (gb :ants)
                      (gb :food))))
 
-(defn- coords-surrounding [[x y]]
+(defn coords-surrounding [[x y]]
   (for [y (range (dec y) (+ y 2))
         x (range (dec x) (+ x 2))]
     [x y]))
 
+(defn tiles-for-positions [board positions]
+  (map #(get-tile board %) positions))
+
 (defn tiles-surrounding [board position]
-  (map #(get-tile board %)
-       (coords-surrounding position)))
+  (tiles-for-positions board
+    (coords-surrounding position)))
 

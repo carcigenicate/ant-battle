@@ -4,7 +4,8 @@
 
 (defrecord Tile-State [color ant? food?])
 
-(defrecord Ant-State [ant surrounding-tiles])
+; TODO: Colony-State
+(defrecord Ant-State [surrounding-tiles])
 
-(defrecord Ant-Move [move-to? new-ant-at? new-tile-color])
-
+; new-ant-at? is a pair of [new-ant-pos ant-type]
+(defrecord Ant-Move [move-to? new-ant-at? new-tile-color?])
