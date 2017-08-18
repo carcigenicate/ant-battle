@@ -1,5 +1,6 @@
 (ns ant-battle.animation.colony-functions)
 
 (def test-f-map
-  {100 (constantly {:move-to? 0})
-   200 (constantly {:move-to? 7})})
+  {:up-right (constantly {:move-to? 0})
+   :down (constantly {:move-to? 7})
+   :nothing (constantly {})})

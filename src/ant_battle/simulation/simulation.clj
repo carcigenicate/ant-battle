@@ -13,8 +13,8 @@
 (defn new-simulation
   "Creates a new simulation state.
    colony-advance-func-map should be a map mapping colony identifiers to functions that will advance each ant."
-  [colony-advance-func-map]
-  (->Simulation-State (b/new-board)
+  [grid-width grid-height colony-advance-func-map]
+  (->Simulation-State (b/new-board grid-width grid-height)
                       colony-advance-func-map))
 
 (defn parse-move [raw-move]
@@ -70,7 +70,10 @@
             (handle-move-to-square board ant (v-coords move-to?))
 
             new-ant-at?
-            (handle-ant-spawn board ant (v-coords spawn-pos) spawn-type))]
+            (handle-ant-spawn board ant (v-coords spawn-pos) spawn-type)
+
+            :else
+            board)]
 
       (if new-tile-color?
         (b/set-color advanced-board ant-pos new-tile-color?)
@@ -84,6 +87,7 @@
 (defn simulate-frame [sim]
   (let [{board :board fm :colony-advance-f-map} sim
         initial-ants (map second (:ants board))]
+    ; TODO: Use running-board so collisions can be avoided.
 
     (loop [[ant & rest-ants] initial-ants
            acc-board board]

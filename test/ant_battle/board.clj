@@ -4,7 +4,7 @@
             [ant-battle.simulation.ant :as a]))
 
 (def test-board
-  (-> (b/new-board)
+  (-> (b/new-board 100 100)
       (b/add-ant [0 0] 0 0)
       (b/add-ant [2 2] 0 0)
       (b/add-ant [1 1] 1 1)

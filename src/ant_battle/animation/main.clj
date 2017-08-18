@@ -16,8 +16,8 @@
 (def display-width 1000)
 (def display-height 1000)
 
-(def grid-width 50)
-(def grid-height 50)
+(def grid-width 10)
+(def grid-height 10)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (max grid-width grid-height))))
@@ -31,23 +31,27 @@
 
 (defrecord Animation-State [sim-state])
 
+#_
 (def test-board
-  (-> (b/new-board)
-      (b/add-ant [7 7] 1 100)
-      (b/add-ant [9 9] 0 100)
-      (b/add-ant [50 50] 1 200)
+  (-> (b/new-board grid-width grid-height)
+      (b/add-ant [7 7] 1 :up-right)
+      (b/add-ant [9 9] 0 :up-right)
+      (b/add-ant [10 11] 1 :down)
       (b/add-food [5 5])
       (b/add-food [3 3])
       (b/add-food [1 1])))
 
+(def test-board
+  (-> (b/new-board grid-width grid-height)
+      (b/add-ant [5 5] 0 :nothing)
+      (b/add-ant [5 0] 1 :down)))
+
 (defn setup-state []
-  (q/frame-rate 2)
+  (q/frame-rate 1)
+
   (->Animation-State (s/->Simulation-State test-board cf/test-f-map)))
 
 (defn update-state [state]
-  #_
-  (clojure.pprint/pprint (:board (:sim-state state)))
-
   (-> state
       (update :sim-state s/simulate-frame)))
 

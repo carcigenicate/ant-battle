@@ -13,21 +13,29 @@
 (comment
   (defmacro inbounds? [board & positions]))
 
-(defrecord Board [ants colors food])
+(defrecord Board [dimensions ants colors food])
 
-(defn new-board []
-  (->Board {} {} #{}))
+(defn new-board [width height]
+  (->Board [width height] {} {} #{}))
+
+(defn wrap-position [board position]
+  (let [[w h] (:dimensions board)
+        [x y] position]
+    ; TODO: Need to inc the dimensions?
+    [(g/wrap x 0 w)
+     (g/wrap y 0 h)]))
 
 (defn add-ant [board position type colony]
-  (let [new-ant (a/new-ant position type colony)]
+  (let [wrapped-pos (wrap-position board position)
+        new-ant (a/new-ant wrapped-pos type colony)]
 
     (update board :ants
-            #(assoc % position new-ant))))
+            #(assoc % wrapped-pos new-ant))))
 
 (defn update-ant
   "Updates the ant at the given position using the given (f)unction.
-  Should not be used to update position.
-  If no ant exists at the position, nil is returned."
+  If no ant exists at the position, nil is returned.
+  WARNING: Should not be used to update position of an ant."
   [board position f]
   (when-let [ant (get-in board [:ants position] nil)]
     (update board :ants #(assoc % position (f ant)))))
@@ -37,24 +45,26 @@
   else, nil is returned."
   [board old-position new-position]
   (when-let [ant (get-in board [:ants old-position] nil)]
-    (-> board
-        (update :ants #(dissoc % old-position))
-        (update :ants #(assoc % new-position
-                               (a/set-position ant new-position))))))
+    (let [wrapped-pos (wrap-position board new-position)]
+      (-> board
+          (update :ants #(dissoc % old-position))
+          (update :ants #(assoc % wrapped-pos
+                                 (a/set-position ant wrapped-pos)))))))
 
 (defn add-food [board position]
   (update board :food
-          #(conj % position)))
+          #(conj % (wrap-position board position))))
 
 (defn remove-food [board position]
+  ; TODO: Need to wrap the position?
   (update board :food
           #(disj % position)))
 
 (defn set-color [board position new-color]
-  (assoc board :colors position new-color))
+  (assoc board :colors (wrap-position board position) new-color))
 
 (defn get-tile [board position]
-  (let [gb #(get-in board [% position] nil)]
+  (let [gb #(get-in board [% (wrap-position board position)] nil)]
     (io/->Tile-State (gb :colors)
                      (gb :ants)
                      (gb :food))))
