@@ -24,6 +24,9 @@
 (defn carrying-n-food [ant]
   (:food ant))
 
+(defn has-food? [ant]
+  (pos? (carrying-n-food ant)))
+
 ; ----- Misc -----
 
 (defn get-type [ant]

@@ -17,16 +17,13 @@
   (= queen-type
      (a/get-type ant)))
 
-(defn has-food? [ant]
-  (pos? (a/carrying-n-food ant)))
-
 (defn ant-modified? [before-ant after-ant]
   (= before-ant after-ant))
 
 (defn full-of-food? [ant]
   (if (queen? ant)
     false
-    (has-food? ant)))
+    (a/has-food? ant)))
 
 (defn give-food
   "Gives an ant food only if it's able to hold more food.
@@ -39,7 +36,7 @@
   "Takes food from the ant if it has food.
   If the ant isn't carrying any food, nil is returned."
   [ant]
-  (when (has-food? ant)
+  (when (a/has-food? ant)
     (a/take-food ant)))
 
 (defn transfer-food
@@ -47,7 +44,7 @@
   If either the source has no food, or the target is full of food, nil is returned, else,
    a pair of [taken-source-ant given-target-ant] is returned."
   [source-ant target-ant]
-  (when (and (has-food? source-ant)
+  (when (and (a/has-food? source-ant)
            (not (full-of-food? target-ant)))
 
     (let [taken-source (take-food source-ant)]

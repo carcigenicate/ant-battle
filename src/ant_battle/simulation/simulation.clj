@@ -21,13 +21,35 @@
   (io/map->Ant-Move raw-move))
 
 (defn handle-ant-spawn [board spawner-ant spawn-position type]
-  (if (ac/has-food? spawner-ant)
+  (if (a/has-food? spawner-ant)
     (-> board
         (b/add-ant spawn-position type (a/get-colony spawner-ant))
         (b/update-ant (a/get-position spawner-ant) a/take-food))
 
     (print-violation-warning "Ant " (into {} spawner-ant)
                              " tried to spawn an ant without carrying food.")))
+
+(defn handle-move-to-square [board moving-ant new-position]
+  (let [{ant? :ant?, food? :food?} (b/get-tile board new-position)
+        ant-pos (a/get-position moving-ant) ; TODO: Remove?
+        move-ant #(b/move-ant % ant-pos new-position)]
+
+    (cond
+      ant?
+      (do
+        ; TODO: Move to same square as queen to deposit/steal?
+        (print-violation-warning "Tried to move onto an already occupied square: "
+                                 (into {} moving-ant) " to " new-position)
+        board)
+
+      (and food? (not (ac/full-of-food? moving-ant)))
+      (-> board
+          (move-ant)
+          (b/update-ant new-position a/give-food)
+          (b/remove-food new-position))
+
+      :else
+      (move-ant board))))
 
 (defn advance-board-with-move [board ant surrounding-coords move]
   (try
@@ -40,13 +62,12 @@
           (cond
             (= true move-to? new-ant-at?)
             (do
-              (print-violation-warning "Cannot move and spawn in the same turn: " (into {} move))
+              (print-violation-warning "Cannot move and spawn in the same turn: "
+                                       (into {} move))
               board)
 
             move-to?
-            ; TODO: Will overwrite any ants at the target coord
-            ; TODO: Create a handle- function to handle collisions
-            (b/move-ant board ant-pos (v-coords move-to?))
+            (handle-move-to-square board ant (v-coords move-to?))
 
             new-ant-at?
             (handle-ant-spawn board ant (v-coords spawn-pos) spawn-type))]
