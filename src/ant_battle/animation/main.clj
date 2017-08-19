@@ -14,18 +14,18 @@
 
   (:import [java.awt Color]))
 
-(def display-width 1000)
-(def display-height 1000)
+(def display-width 2500)
+(def display-height 1500)
 
-(def grid-width 30)
-(def grid-height 30)
+(def grid-width 20)
+(def grid-height 20)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (min grid-width grid-height))))
 (def half-grid-length (/ grid-side-length 2))
 
 (def ant-height (* grid-side-length 1))
-(def ant-width (* grid-side-length 0.5))
+(def ant-width (* grid-side-length 0.6))
 
 (def dark-food-color [200 125 50])
 (def food-radius ant-width)
@@ -34,22 +34,10 @@
 
 (defrecord Animation-State [sim-state])
 
-(defn add-random-ants [board n-ants colonies rand-gen]
-  (reduce (fn [acc-b _]
-            (b/add-ant acc-b (mapv int (ph/random-point 0 grid-width 0 grid-height rand-gen))
-                             0
-                             (g/random-from-collection colonies rand-gen)))
-          board
-          (range n-ants)))
-
-
 (def test-board
   (-> (b/new-board grid-width grid-height)
-      (add-random-ants (* grid-width grid-height 0.5) (keys cf/test-f-map) global-rand-gen)
-      (b/add-food [0 0])
-      (b/add-food [17 5])
-      (b/add-food [15 10])
-      (b/add-food [5 18])))
+      (b/add-random-ants (* grid-width grid-height 0.01) (keys cf/test-f-map) global-rand-gen)
+      (b/add-food-to-grid)))
 
 (defn setup-state []
   (q/frame-rate 1000)

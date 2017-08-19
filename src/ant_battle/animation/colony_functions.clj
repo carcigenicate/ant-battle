@@ -4,7 +4,7 @@
 (def smooth-a (atom 0))
 
 (def test-f-map
-  {:up-right      (constantly {:move-to? 0})
+  {:down-left     (constantly {:move-to? 6})
    :down          (constantly {:move-to? 7})
    :left          (constantly {:move-to? 3})
    #_ (:nothing       (constantly {}))

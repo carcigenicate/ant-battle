@@ -5,7 +5,8 @@
 
             [helpers.general-helpers :as g]
 
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [helpers.point-helpers :as ph]))
 
 ; TODO: Default color?
 ; TODO: Overwrite checks for ants?
@@ -81,5 +82,21 @@
 (defn tiles-surrounding [board position]
   (tiles-for-positions board
     (coords-surrounding position)))
+
+(defn add-random-ants [board n-ants colonies rand-gen]
+  (let [[w h] (:dimensions board)]
+    (reduce (fn [acc-b _]
+              (add-ant acc-b (mapv int (ph/random-point 0 w 0 h rand-gen))
+                       0
+                       (g/random-from-collection colonies rand-gen)))
+            board
+            (range n-ants))))
+
+(defn add-food-to-grid [board]
+  (let [[w h] (:dimensions board)]
+    (reduce add-food board
+            (for [y (range h)
+                  x (range w)]
+              [x y]))))
 
 
