@@ -17,8 +17,8 @@
 (def display-width 2500)
 (def display-height 1500)
 
-(def grid-width 20)
-(def grid-height 20)
+(def grid-width 50)
+(def grid-height 50)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (min grid-width grid-height))))
@@ -27,7 +27,7 @@
 (def ant-height (* grid-side-length 1))
 (def ant-width (* grid-side-length 0.6))
 
-(def dark-food-color [200 125 50])
+(def food-color [200 125 50])
 (def food-radius ant-width)
 
 (def global-rand-gen (g/new-rand-gen 99))
@@ -36,7 +36,7 @@
 
 (def test-board
   (-> (b/new-board grid-width grid-height)
-      (b/add-random-ants (* grid-width grid-height 0.01) (keys cf/test-f-map) global-rand-gen)
+      (b/add-random-ants (* grid-width grid-height 0.2) (keys cf/test-f-map) global-rand-gen)
       (b/add-food-to-grid)))
 
 (defn setup-state []
@@ -53,7 +53,7 @@
    (g/map-range y 0 grid-height 0 display-height)])
 
 (defn color-type-to-color-vec [color-type]
-  (let [c (Color. (hash color-type))]
+  (let [c (Color. (mod (hash color-type) 65025))]
     [(.getRed c) (.getGreen c) (.getBlue c)]))
 
 (defn invert-color [color]
@@ -68,13 +68,14 @@
       [10 50 10])))
 
 (defn draw-ant [ant]
-  (let [ant-color (color-type-to-color-vec (hash (a/get-colony ant)))
+  (let [ant-color (color-type-to-color-vec (a/get-colony ant))
         grid-pos (a/get-position ant)
         [x y] (grid-coord-to-screen grid-pos)
         adj-x (+ x half-grid-length)
         adj-y (+ y half-grid-length)]
 
     (q/with-fill ant-color
+      ; TODO: Expensive? Make q/point?
       (q/ellipse adj-x adj-y ant-width ant-height))
 
     (when (a/has-food? ant)
@@ -89,12 +90,12 @@
 
 (defn draw-food [food]
   (qh/with-weight food-radius
-    (q/with-stroke dark-food-color
+    (q/with-stroke food-color
 
-                   (doseq [f food
-                           :let [[x' y'] (grid-coord-to-screen f)]]
+      (doseq [f food
+              :let [[x' y'] (grid-coord-to-screen f)]]
 
-                    (q/point (+ x' half-grid-length) (+ y' half-grid-length))))))
+        (q/point (+ x' half-grid-length) (+ y' half-grid-length))))))
 
 (defn draw-grid []
   (doseq [y (range 0 display-height grid-side-length)
@@ -106,6 +107,7 @@
 ; TODO: Only draw over cells that have changed.
 ; TODO: Take the difference of the previous board and the new board, and only redraw those cells
 ; TODO: (mapv first (set/difference (set old-board) (set new-board))
+; TODO: Failed miserably. Try again.
 (defn draw-state [state]
   (q/background 200 200 200)
 

@@ -10,7 +10,7 @@
    #_ (:nothing       (constantly {}))
 
    :smooth-random (fn [_]
-                    (let [b (- (rand-int 3) 0)
+                    (let [b (- (rand-int 2) 0)
                           a (g/wrap (+ @smooth-a b) 0 8)]
                       (reset! smooth-a a)
                       {:move-to? a}))})
