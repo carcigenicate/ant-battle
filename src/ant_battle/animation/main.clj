@@ -7,6 +7,7 @@
 
             [helpers.general-helpers :as g]
             [helpers.quil-helpers :as qh]
+            [helpers.point-helpers :as ph]
 
             [ant-battle.simulation.board :as b]
             [ant-battle.simulation.ant-controller :as ac])
@@ -16,38 +17,42 @@
 (def display-width 1000)
 (def display-height 1000)
 
-(def grid-width 10)
-(def grid-height 10)
+(def grid-width 30)
+(def grid-height 30)
 
 (def grid-side-length (double (/ (min display-width display-height)
-                                 (max grid-width grid-height))))
+                                 (min grid-width grid-height))))
 (def half-grid-length (/ grid-side-length 2))
 
 (def ant-height (* grid-side-length 1))
 (def ant-width (* grid-side-length 0.5))
 
-(def food-color [200 125 50])
+(def dark-food-color [200 125 50])
 (def food-radius ant-width)
+
+(def global-rand-gen (g/new-rand-gen 99))
 
 (defrecord Animation-State [sim-state])
 
-#_
-(def test-board
-  (-> (b/new-board grid-width grid-height)
-      (b/add-ant [7 7] 1 :up-right)
-      (b/add-ant [9 9] 0 :up-right)
-      (b/add-ant [10 11] 1 :down)
-      (b/add-food [5 5])
-      (b/add-food [3 3])
-      (b/add-food [1 1])))
+(defn add-random-ants [board n-ants colonies rand-gen]
+  (reduce (fn [acc-b _]
+            (b/add-ant acc-b (mapv int (ph/random-point 0 grid-width 0 grid-height rand-gen))
+                             0
+                             (g/random-from-collection colonies rand-gen)))
+          board
+          (range n-ants)))
+
 
 (def test-board
   (-> (b/new-board grid-width grid-height)
-      (b/add-ant [5 5] 0 :nothing)
-      (b/add-ant [5 0] 1 :down)))
+      (add-random-ants (* grid-width grid-height 0.5) (keys cf/test-f-map) global-rand-gen)
+      (b/add-food [0 0])
+      (b/add-food [17 5])
+      (b/add-food [15 10])
+      (b/add-food [5 18])))
 
 (defn setup-state []
-  (q/frame-rate 1)
+  (q/frame-rate 1000)
 
   (->Animation-State (s/->Simulation-State test-board cf/test-f-map)))
 
@@ -63,6 +68,17 @@
   (let [c (Color. (hash color-type))]
     [(.getRed c) (.getGreen c) (.getBlue c)]))
 
+(defn invert-color [color]
+  (mapv #(g/wrap (+ 128 %) 0 256)
+        color))
+
+(defn food-marker-color [ant-color]
+  (let [half-intensity 384
+        sum (reduce + 0 ant-color)]
+    (if (<= sum half-intensity)
+      [150 200 150]
+      [10 50 10])))
+
 (defn draw-ant [ant]
   (let [ant-color (color-type-to-color-vec (hash (a/get-colony ant)))
         grid-pos (a/get-position ant)
@@ -74,7 +90,7 @@
       (q/ellipse adj-x adj-y ant-width ant-height))
 
     (when (a/has-food? ant)
-      (q/with-stroke [0 0 0]
+      (q/with-stroke (food-marker-color ant-color)
         (qh/with-weight (* ant-width 0.5)
           (q/point adj-x adj-y))))
 
@@ -85,12 +101,12 @@
 
 (defn draw-food [food]
   (qh/with-weight food-radius
-    (q/with-stroke food-color
+    (q/with-stroke dark-food-color
 
-      (doseq [f food
-              :let [[x' y'] (grid-coord-to-screen f)]]
+                   (doseq [f food
+                           :let [[x' y'] (grid-coord-to-screen f)]]
 
-        (q/point (+ x' half-grid-length) (+ y' half-grid-length))))))
+                    (q/point (+ x' half-grid-length) (+ y' half-grid-length))))))
 
 (defn draw-grid []
   (doseq [y (range 0 display-height grid-side-length)
@@ -106,7 +122,7 @@
   (q/background 200 200 200)
 
   (let [{ants :ants, food :food} (:board (:sim-state state))]
-    (draw-grid)
+    #_(draw-grid)
 
     (doseq [a (map second ants)]
       (draw-ant a))

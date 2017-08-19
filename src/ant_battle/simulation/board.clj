@@ -37,8 +37,9 @@
   If no ant exists at the position, nil is returned.
   WARNING: Should not be used to update position of an ant."
   [board position f]
-  (when-let [ant (get-in board [:ants position] nil)]
-    (update board :ants #(assoc % position (f ant)))))
+  (let [wrapped-pos (wrap-position board position)]
+    (when-let [ant (get-in board [:ants wrapped-pos] nil)]
+      (update board :ants #(assoc % wrapped-pos (f ant))))))
 
 (defn move-ant
   "If an ant can be found at old-position, it's moved to new-position

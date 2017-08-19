@@ -6,9 +6,12 @@
 
 (defrecord Simulation-State [board colony-advance-f-map])
 
+(def print-violations? false)
+
 (defn print-violation-warning [& message]
-  (println
-    (str "Warning: " (apply str message) " - Turn skipped.")))
+  (when print-violations?
+    (println
+      (str "Warning: " (apply str message) " - Turn skipped."))))
 
 (defn new-simulation
   "Creates a new simulation state.
@@ -35,7 +38,7 @@
         move-ant #(b/move-ant % ant-pos new-position)]
 
     (cond
-      ant?
+      (and ant? (not= ant? moving-ant))
       (do
         ; TODO: Move to same square as queen to deposit/steal?
         (print-violation-warning "Tried to move onto an already occupied square: "
@@ -87,7 +90,6 @@
 (defn simulate-frame [sim]
   (let [{board :board fm :colony-advance-f-map} sim
         initial-ants (map second (:ants board))]
-    ; TODO: Use running-board so collisions can be avoided.
 
     (loop [[ant & rest-ants] initial-ants
            acc-board board]
