@@ -3,14 +3,24 @@
 
 (def smooth-a (atom 0))
 
+:move-to?
+
 (def test-f-map
-  {:down-left     (constantly {:move-to? 6})
-   :down          (constantly {:move-to? 7})
-   :left          (constantly {:move-to? 3})
+  {:down-left     (constantly {:move-to 6, :tile-color 5})
+   :right          (constantly {:move-to 5, :tile-color 3})
    #_ (:nothing       (constantly {}))
 
    :smooth-random (fn [_]
                     (let [b (- (rand-int 2) 0)
                           a (g/wrap (+ @smooth-a b) 0 8)]
                       (reset! smooth-a a)
-                      {:move-to? a}))})
+                      {:move-to a
+                       :tile-color 10}))
+
+   :down          (fn [{tiles :surrounding-tiles :as state}]
+
+                    (let [current-color (or (get-in tiles [4 :color])
+                                            1)]
+
+                      {:move-to 7,
+                       :tile-color (inc current-color)}))})

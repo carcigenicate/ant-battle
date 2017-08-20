@@ -14,11 +14,11 @@
 
   (:import [java.awt Color]))
 
-(def display-width 2500)
-(def display-height 1500)
+(def display-width 1000)
+(def display-height 1000)
 
-(def grid-width 50)
-(def grid-height 50)
+(def grid-width 10)
+(def grid-height 10)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (min grid-width grid-height))))
@@ -30,19 +30,36 @@
 (def food-color [200 125 50])
 (def food-radius ant-width)
 
+(def global-colony-fs cf/test-f-map)
+
 (def global-rand-gen (g/new-rand-gen 99))
 
 (defrecord Animation-State [sim-state])
 
-(def test-board
-  (-> (b/new-board grid-width grid-height)
-      (b/add-random-ants (* grid-width grid-height 0.2) (keys cf/test-f-map) global-rand-gen)
-      (b/add-food-to-grid)))
+(defn starting-queens [colony-identifiers rand-gen]
+  (let [r-pos #(ph/random-point 0 grid-width 0 grid-height rand-gen)]
+    (mapv #(a/new-ant (r-pos) ac/queen-type %)
+          colony-identifiers)))
+
+(defn starting-board [width height colonies rand-gen]
+  (-> (b/new-board width height)
+      (b/add-ants (starting-queens colonies rand-gen))))
+
+(defn starting-sim-state [board-dimensions colony-f-map rand-gen]
+  (let [[w h] board-dimensions
+        board (starting-board w h (keys colony-f-map) rand-gen)]
+
+    (s/->Simulation-State board colony-f-map)))
 
 (defn setup-state []
   (q/frame-rate 1000)
 
-  (->Animation-State (s/->Simulation-State test-board cf/test-f-map)))
+  (let [sim-state (starting-sim-state [grid-width grid-height]
+                                      global-colony-fs global-rand-gen)
+        test-board (-> (b/new-board grid-width grid-height)
+                       (b/add-ants (for [x (range grid-width)] (a/new-ant [x x] 0 :down))))
+        test-sim (assoc sim-state :board test-board)]
+    (->Animation-State test-sim)))
 
 (defn update-state [state]
   (-> state
@@ -104,6 +121,14 @@
     (q/no-fill)
     (q/rect x y grid-side-length grid-side-length)))
 
+(defn draw-tiles-colors [tiles]
+  (doseq [[pos color] tiles
+          :let [v-color (color-type-to-color-vec color)
+                [x y] (grid-coord-to-screen pos)]]
+    (q/with-fill v-color
+      (q/rect x y
+              grid-side-length grid-side-length))))
+
 ; TODO: Only draw over cells that have changed.
 ; TODO: Take the difference of the previous board and the new board, and only redraw those cells
 ; TODO: (mapv first (set/difference (set old-board) (set new-board))
@@ -111,8 +136,10 @@
 (defn draw-state [state]
   (q/background 200 200 200)
 
-  (let [{ants :ants, food :food} (:board (:sim-state state))]
-    #_(draw-grid)
+  (let [{ants :ants, food :food, tile-colors :colors} (:board (:sim-state state))]
+    (draw-tiles-colors tile-colors)
+
+    (draw-grid)
 
     (doseq [a (map second ants)]
       (draw-ant a))

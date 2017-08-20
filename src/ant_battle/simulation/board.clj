@@ -26,12 +26,19 @@
     [(g/wrap x 0 w)
      (g/wrap y 0 h)]))
 
-(defn add-ant [board position type colony]
-  (let [wrapped-pos (wrap-position board position)
-        new-ant (a/new-ant wrapped-pos type colony)]
+(defn add-ant
+  ([board position type colony]
+   (let [wrapped-pos (wrap-position board position)
+         new-ant (a/new-ant wrapped-pos type colony)]
 
-    (update board :ants
-            #(assoc % wrapped-pos new-ant))))
+     (add-ant board new-ant)))
+
+  ([board ant]
+   (update board :ants
+           #(assoc % (a/get-position ant) ant))))
+
+(defn add-ants [board ants]
+  (reduce add-ant board ants))
 
 (defn update-ant
   "Updates the ant at the given position using the given (f)unction.
@@ -63,7 +70,7 @@
           #(disj % position)))
 
 (defn set-color [board position new-color]
-  (assoc board :colors (wrap-position board position) new-color))
+  (update board :colors #(assoc % (wrap-position board position) new-color)))
 
 (defn get-tile [board position]
   (let [gb #(get-in board [% (wrap-position board position)] nil)]

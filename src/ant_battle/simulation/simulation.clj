@@ -56,30 +56,30 @@
 
 (defn advance-board-with-move [board ant surrounding-coords move]
   (try
-    (let [{:keys [move-to? new-ant-at? new-tile-color?]} move
-          [spawn-pos spawn-type] new-ant-at?
+    (let [{:keys [move-to new-ant-at tile-color]} move
+          [spawn-pos spawn-type] new-ant-at
           ant-pos (a/get-position ant)
           v-coords (vec surrounding-coords)
 
           advanced-board
           (cond
-            (= true move-to? new-ant-at?)
+            (= true move-to new-ant-at)
             (do
               (print-violation-warning "Cannot move and spawn in the same turn: "
                                        (into {} move))
               board)
 
-            move-to?
-            (handle-move-to-square board ant (v-coords move-to?))
+            move-to
+            (handle-move-to-square board ant (v-coords move-to))
 
-            new-ant-at?
+            new-ant-at
             (handle-ant-spawn board ant (v-coords spawn-pos) spawn-type)
 
             :else
             board)]
 
-      (if new-tile-color?
-        (b/set-color advanced-board ant-pos new-tile-color?)
+      (if tile-color
+        (b/set-color advanced-board ant-pos tile-color)
         advanced-board))
 
     (catch Exception e
@@ -101,7 +101,7 @@
               neigh-tiles (vec (b/tiles-for-positions acc-board neigh-coords))
 
               input (io/->Ant-State neigh-tiles)
-              move (parse-move (advance-f ant))
+              move (parse-move (advance-f input))
               advanced-board (advance-board-with-move acc-board ant neigh-coords move)]
 
           (recur rest-ants advanced-board))

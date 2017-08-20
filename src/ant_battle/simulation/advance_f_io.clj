@@ -6,4 +6,4 @@
 (defrecord Ant-State [surrounding-tiles])
 
 ; new-ant-at? is a pair of [new-ant-pos ant-type]
-(defrecord Ant-Move [move-to? new-ant-at? new-tile-color?])
+(defrecord Ant-Move [move-to new-ant-at tile-color])
