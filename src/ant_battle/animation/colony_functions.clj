@@ -20,7 +20,7 @@
    :down          (fn [{tiles :surrounding-tiles :as state}]
 
                     (let [current-color (or (get-in tiles [4 :color])
-                                            1)]
+                                            (rand-int 255))]
 
                       {:move-to 7,
                        :tile-color (inc current-color)}))})

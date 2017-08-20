@@ -17,8 +17,8 @@
 (def display-width 1000)
 (def display-height 1000)
 
-(def grid-width 50)
-(def grid-height 50)
+(def grid-width 60)
+(def grid-height 60)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (min grid-width grid-height))))
@@ -54,10 +54,10 @@
 (defn setup-state []
   (q/frame-rate 1000)
 
-  (let [sim-state (starting-sim-state [grid-width grid-heights]
+  (let [sim-state (starting-sim-state [grid-width grid-height]
                                       global-colony-fs global-rand-gen)
         test-board (-> (b/new-board grid-width grid-height)
-                       (b/add-random-ants (* 0.05 grid-width grid-height) (keys global-colony-fs) global-rand-gen))
+                       (b/add-random-ants (* 0.01 grid-width grid-height) (keys global-colony-fs) global-rand-gen))
         test-sim (assoc sim-state :board test-board)]
     (->Animation-State test-sim)))
 
@@ -66,8 +66,8 @@
       (update :sim-state s/simulate-frame)))
 
 (defn grid-coord-to-screen [[x y]]
-  [(int (g/map-range x 0 grid-width 0 display-width))
-   (int (g/map-range y 0 grid-height 0 display-height))])
+  [(g/map-range x 0 grid-width 0 display-width)
+   (g/map-range y 0 grid-height 0 display-height)])
 
 (defn color-type-to-color-vec [color-type]
   (let [c (Color. (mod (hash color-type) 65025))]
