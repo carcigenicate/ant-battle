@@ -17,8 +17,8 @@
 (def display-width 1000)
 (def display-height 1000)
 
-(def grid-width 10)
-(def grid-height 10)
+(def grid-width 50)
+(def grid-height 50)
 
 (def grid-side-length (double (/ (min display-width display-height)
                                  (min grid-width grid-height))))
@@ -37,7 +37,7 @@
 (defrecord Animation-State [sim-state])
 
 (defn starting-queens [colony-identifiers rand-gen]
-  (let [r-pos #(ph/random-point 0 grid-width 0 grid-height rand-gen)]
+  (let [r-pos #(mapv int (ph/random-point 0 grid-width 0 grid-height rand-gen))]
     (mapv #(a/new-ant (r-pos) ac/queen-type %)
           colony-identifiers)))
 
@@ -54,10 +54,10 @@
 (defn setup-state []
   (q/frame-rate 1000)
 
-  (let [sim-state (starting-sim-state [grid-width grid-height]
+  (let [sim-state (starting-sim-state [grid-width grid-heights]
                                       global-colony-fs global-rand-gen)
         test-board (-> (b/new-board grid-width grid-height)
-                       (b/add-ants (for [x (range grid-width)] (a/new-ant [x x] 0 :down))))
+                       (b/add-random-ants (* 0.05 grid-width grid-height) (keys global-colony-fs) global-rand-gen))
         test-sim (assoc sim-state :board test-board)]
     (->Animation-State test-sim)))
 
@@ -66,8 +66,8 @@
       (update :sim-state s/simulate-frame)))
 
 (defn grid-coord-to-screen [[x y]]
-  [(g/map-range x 0 grid-width 0 display-width)
-   (g/map-range y 0 grid-height 0 display-height)])
+  [(int (g/map-range x 0 grid-width 0 display-width))
+   (int (g/map-range y 0 grid-height 0 display-height))])
 
 (defn color-type-to-color-vec [color-type]
   (let [c (Color. (mod (hash color-type) 65025))]
@@ -136,7 +136,9 @@
 (defn draw-state [state]
   (q/background 200 200 200)
 
-  (let [{ants :ants, food :food, tile-colors :colors} (:board (:sim-state state))]
+  (let [board (:board (:sim-state state))
+        {ants :ants, food :food, tile-colors :colors} board]
+
     (draw-tiles-colors tile-colors)
 
     (draw-grid)
